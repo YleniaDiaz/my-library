@@ -1,12 +1,16 @@
 // Adaptador (rutas HTTP)
-// src/books/infrastructure/book.controller.ts
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { CreateBookService } from '../application/create-book.service';
+import { FindAllBooksService } from '../application/find-all-books.service'; // Importa el nuevo servicio
 import { CreateBookDto } from './dto/create-book.dto';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Controller('books') // ruta base '/books'
 export class BookController {
-  constructor(private readonly createBookService: CreateBookService) {}
+  constructor(
+    private readonly createBookService: CreateBookService,
+    private readonly findAllBooksService: FindAllBooksService,
+  ) {}
 
   @Post()
   async createBook(@Body() createBookDto: CreateBookDto) {
@@ -14,6 +18,16 @@ export class BookController {
     return {
       message: 'Libro registrado exitosamente',
       data: book,
+    };
+  }
+
+  @Get()
+  async findAllBooks(@Query() paginationDto: PaginationDto) {
+    const result = await this.findAllBooksService.execute(paginationDto);
+    return {
+      message: 'Libros recuperados exitosamente',
+      data: result.data,
+      meta: result.meta,
     };
   }
 }

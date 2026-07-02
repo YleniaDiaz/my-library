@@ -28,8 +28,23 @@ export class BookPostgresRepository implements IBookRepository {
     return BookMapper.toDomain(ormEntity); // convertir TypeORM en domain
   }
 
-  async findAll(): Promise<Book[]> {
-    const ormEntities = await this.ormRepository.find(); // get todos los 'books'
-    return ormEntities.map((entity) => BookMapper.toDomain(entity)); // Map TypeORM a domain
+  async findAll(
+    skip: number,
+    take: number,
+  ): Promise<{ data: Book[]; total: number }> {
+    // findAndCount -> return array -> [datos, total]
+    const [ormEntities, total] = await this.ormRepository.findAndCount({
+      skip: skip,
+      take: take,
+      order: { title: 'ASC' }, // ordenar alfabéticamente por título
+    });
+
+    // Map TypeORM a Dominio
+    const books = ormEntities.map((entity) => BookMapper.toDomain(entity));
+
+    return {
+      data: books,
+      total: total,
+    };
   }
 }
