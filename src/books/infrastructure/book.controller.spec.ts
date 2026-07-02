@@ -1,11 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateBookService } from '../application/create-book.service';
+import { FindAllBooksService } from '../application/find-all-books.service';
 import { BookController } from './book.controller';
 
 describe('BookController', () => {
   let controller: BookController;
 
   const mockCreateBookService = { execute: jest.fn() };
+  const mockFindAllBooksService = { execute: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -14,6 +16,10 @@ describe('BookController', () => {
         {
           provide: CreateBookService,
           useValue: mockCreateBookService,
+        },
+        {
+          provide: FindAllBooksService,
+          useValue: mockFindAllBooksService,
         },
       ],
     }).compile();
@@ -34,9 +40,32 @@ describe('BookController', () => {
 
     // Verificar estructura de respuesta
     expect(response).toEqual({
-      message: 'Libro registrado exitosamente',
+      message: 'Added book successfully',
       data: expectedBook,
     });
     expect(mockCreateBookService.execute).toHaveBeenCalledWith(dto); // verificar que el controlador llamó al servicio
+  });
+
+  it('debería devolver un mensaje de éxito y los datos de los libros', async () => {
+    const paginationDto = { page: 1, limit: 10 };
+    const expectedResult = {
+      message: 'Found all books successfully',
+      data: [
+        { id: 'uuid-1', title: 'Libro 1', author: 'Autor 1' },
+        { id: 'uuid-2', title: 'Libro 2', author: 'Autor 2' },
+      ],
+      meta: {
+        totalItems: 2,
+        itemCount: 2,
+        itemsPerPage: 10,
+        totalPages: 1,
+        currentPage: 1,
+      },
+    };
+    mockFindAllBooksService.execute.mockResolvedValue(expectedResult);
+    const response = await controller.findAllBooks(paginationDto);
+
+    expect(response).toEqual(expectedResult);
+    expect(mockFindAllBooksService.execute).toHaveBeenCalledWith(paginationDto);
   });
 });

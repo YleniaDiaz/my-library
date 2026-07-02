@@ -16,7 +16,7 @@ export class BookController {
   async createBook(@Body() createBookDto: CreateBookDto) {
     const book = await this.createBookService.execute(createBookDto);
     return {
-      message: 'Libro registrado exitosamente',
+      message: 'Added book successfully',
       data: book,
     };
   }
@@ -25,7 +25,7 @@ export class BookController {
   async findAllBooks(@Query() paginationDto: PaginationDto) {
     const result = await this.findAllBooksService.execute(paginationDto);
     return {
-      message: 'Libros recuperados exitosamente',
+      message: 'Found all books successfully',
       data: result.data,
       meta: result.meta,
     };
