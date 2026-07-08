@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CreateBookService } from '../application/create-book.service';
 import { FindAllBooksService } from '../application/find-all-books.service';
 import { FindBookByIdService } from '../application/find-book-by-id.service';
+import { UpdateBookService } from '../application/update-book.service';
 import { BookController } from './book.controller';
 
 describe('BookController', () => {
@@ -10,6 +11,7 @@ describe('BookController', () => {
   const mockCreateBookService = { execute: jest.fn() };
   const mockFindAllBooksService = { execute: jest.fn() };
   const mockFindBookByIdService = { execute: jest.fn() };
+  const mockUpdateBookService = { execute: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -27,13 +29,17 @@ describe('BookController', () => {
           provide: FindBookByIdService,
           useValue: mockFindBookByIdService,
         },
+        {
+          provide: UpdateBookService,
+          useValue: mockUpdateBookService,
+        },
       ],
     }).compile();
 
     controller = module.get<BookController>(BookController);
   });
 
-  it('debería devolver un mensaje de éxito y los datos del libro', async () => {
+  it('debería devolver un mensaje de éxito tras crear y los datos del libro', async () => {
     const dto = {
       externalId: 'ext-123',
       title: 'El Quijote',
@@ -90,5 +96,23 @@ describe('BookController', () => {
       data: expectedBook,
     });
     expect(mockFindBookByIdService.execute).toHaveBeenCalledWith(bookId);
+  });
+
+  it('debería devolver un mensaje de éxito tras actualizar y los datos del libro', async () => {
+    const dto = {
+      externalId: 'ext-123',
+      title: 'El Quijote',
+      author: 'Cervantes',
+      coverUrl: 'http://imagen.com/portada.jpg',
+    };
+    const expectedBook = { id: 'uuid-generado', ...dto };
+    mockUpdateBookService.execute.mockResolvedValue(expectedBook);
+    const response = await controller.updateBook('book-123', dto);
+
+    expect(response).toEqual({
+      message: 'Updated book successfully',
+      data: expectedBook,
+    });
+    expect(mockUpdateBookService.execute).toHaveBeenCalledWith('book-123', dto);
   });
 });
