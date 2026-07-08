@@ -9,6 +9,8 @@ describe('CreateBookService', () => {
   const mockBookRepository = { save: jest.fn() };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     // Configurar módulo de pruebas
     const module: TestingModule = await Test.createTestingModule({
       providers: [

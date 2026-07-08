@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateBookService } from '../application/create-book.service';
 import { FindAllBooksService } from '../application/find-all-books.service';
+import { FindBookByIdService } from '../application/find-book-by-id.service';
 import { BookController } from './book.controller';
 
 describe('BookController', () => {
@@ -8,6 +9,7 @@ describe('BookController', () => {
 
   const mockCreateBookService = { execute: jest.fn() };
   const mockFindAllBooksService = { execute: jest.fn() };
+  const mockFindBookByIdService = { execute: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -20,6 +22,10 @@ describe('BookController', () => {
         {
           provide: FindAllBooksService,
           useValue: mockFindAllBooksService,
+        },
+        {
+          provide: FindBookByIdService,
+          useValue: mockFindBookByIdService,
         },
       ],
     }).compile();
@@ -67,5 +73,22 @@ describe('BookController', () => {
 
     expect(response).toEqual(expectedResult);
     expect(mockFindAllBooksService.execute).toHaveBeenCalledWith(paginationDto);
+  });
+
+  it('debería devolver un mensaje de éxito y los datos del libro', async () => {
+    const bookId = '123e4567-e89b-12d3-a456-426614174000';
+    const expectedBook = {
+      id: bookId,
+      title: 'Código Limpio',
+      author: 'Robert C. Martin',
+    };
+    mockFindBookByIdService.execute.mockResolvedValue(expectedBook);
+    const response = await controller.findById(bookId);
+
+    expect(response).toEqual({
+      message: 'Found book successfully',
+      data: expectedBook,
+    });
+    expect(mockFindBookByIdService.execute).toHaveBeenCalledWith(bookId);
   });
 });

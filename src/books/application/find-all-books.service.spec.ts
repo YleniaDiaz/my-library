@@ -6,6 +6,8 @@ describe('FindAllBooksService', () => {
   const mockBookRepository = { findAll: jest.fn() };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FindAllBooksService,
